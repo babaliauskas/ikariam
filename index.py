@@ -94,7 +94,7 @@ class Bot_ikariam:
         self.check_attack()
 
     def check_again(self):
-        sleep(20)
+        sleep(60 * 10)
         self.military_tab()
         self.check_attack()
 
