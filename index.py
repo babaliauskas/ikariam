@@ -53,14 +53,17 @@ class Bot_ikariam:
         btn.click()
 
     def check_attack(self):
-        attack = self.driver.find_element_by_xpath(
-            '//*[@id="js_MilitaryMovementsFleetMovementsTable"]/table/tbody/tr[@class="ally"]')
+        try:
+            attack = self.driver.find_element_by_xpath(
+                '//*[@id="js_MilitaryMovementsFleetMovementsTable"]/table/tbody/tr[@class="ally"]')
         # attack2 = self.driver.find_element_by_xpath(
         #     '//*[@id="js_MilitaryMovementsFleetMovementsTable"]/table/tbody/tr[@class="alt hostile"]')
-        if attack:
+
             self.send_email()
             self.check_again()
-        elif:
+            print('yes')
+        except:
+            print('default')
             self.check_again()
 
     def send_email(self):
@@ -91,8 +94,7 @@ class Bot_ikariam:
         self.check_attack()
 
     def check_again(self):
-        sleep(60 * 10)
-        print('again')
+        sleep(20)
         self.military_tab()
         self.check_attack()
 
