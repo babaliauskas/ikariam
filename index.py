@@ -10,8 +10,14 @@ from time import sleep
 
 
 class Bot_ikariam:
+
+    attack_el = '//*[@id="js_MilitaryMovementsFleetMovementsTable"]/table/tbody/tr[contains(@class, "hostile")]'
+
     def __init__(self, *args, **kwargs):
         self.driver = webdriver.Chrome()
+        self.name = ''
+        self.attackers = []
+        self.attackers2 = []
 
     def get_browser(self):
         self.driver.get('https://lobby.ikariam.gameforge.com/en_US/hub')
@@ -54,17 +60,34 @@ class Bot_ikariam:
 
     def check_attack(self):
         try:
-            attack = self.driver.find_element_by_xpath(
-                '//*[@id="js_MilitaryMovementsFleetMovementsTable"]/table/tbody/tr[@class="ally"]')
-        # attack2 = self.driver.find_element_by_xpath(
-        #     '//*[@id="js_MilitaryMovementsFleetMovementsTable"]/table/tbody/tr[@class="alt hostile"]')
+            attacks = self.driver.find_elements_by_xpath(self.attack_el)
+            for num in range(0, len(attacks)):
+                name = self.check_name(num)
+                city = self.check_city(num)
+                if {"player": name, "city": city} not in self.attackers:
+                    self.attackers.append({"player": name, "city": city})
 
-            self.send_email()
+            if str(self.attackers) != str(self.attackers2):
+                self.attackers2 = self.attackers
+                self.send_email()
+
+            print('Attack')
             self.check_again()
-            print('yes')
         except:
-            print('default')
+            print('No Attack')
             self.check_again()
+
+    def check_name(self, num):
+        name_el = self.driver.find_element_by_xpath(
+            f'{self.attack_el}[{num+1}]/td[@class="source"]/a')
+        name = name_el.text
+        return name
+
+    def check_city(self, num):
+        city_el = self.driver.find_element_by_xpath(
+            f'{self.attack_el}[{num+1}]/td[@class="source"]/span')
+        city = city_el.text
+        return city
 
     def send_email(self):
         try:
@@ -72,15 +95,17 @@ class Bot_ikariam:
             server.ehlo()
             server.starttls()
             server.login(config.EMAIL_ADDRESS, config.PASSWORD)
-            message = 'Someone is attacking me!!'
-            # server.sendmail(config.EMAIL_ADDRESS,
-            #                 'lukasoscheel@gmail.com', message)
+            message = ''
+            for asd in self.attackers:
+                message = message + \
+                    f'\n {asd["city"]} is attacking me from {asd["player"]}'
+            print(message)
             server.sendmail(config.EMAIL_ADDRESS,
                             config.EMAIL_ADDRESS, message)
             server.quit()
-            print('Success')
+            print('Email Success')
         except:
-            print('failed')
+            print('Email Failed')
 
     def run_bot(self):
         self.get_browser()
@@ -94,10 +119,14 @@ class Bot_ikariam:
         self.check_attack()
 
     def check_again(self):
-        sleep(60 * 10)
+        # print('again')
+        sleep(15)
         self.military_tab()
         self.check_attack()
 
 
 game = Bot_ikariam()
 game.run_bot()
+
+
+# //*[@id = "js_MilitaryMovementsFleetMovementsTable"]/table/tbody/tr[2]/td[6]
